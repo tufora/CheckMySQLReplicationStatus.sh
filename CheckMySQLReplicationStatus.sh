@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #
-# Tufora.com
-# https://github.com/tufora/CheckMySQLReplicationStatus.sh.git
+#   Tufora.com
+#   https://github.com/tufora/CheckMySQLReplicationStatus.sh.git
 #
 
 ServiceSystemName="mysql"
@@ -17,14 +17,14 @@ ReplicationStatusFile="ReplicationStatus.txt"
 ReplicationStatusValue="$(<$ReplicationStatusFile)"
 LagStatusFile="LagStatus.txt"
 LagStatusValue="$(<$LagStatusFile)"
-SlackChannelName="#webhook-test"
+SlackChannelName="slack-channel"
 SlackWebhookURL="https://hooks.slack.com/services/AAAAA/BBBBBBBB/CCCCCCCCCCCCCC"
 
 CheckStatusFiles() {
 
     #
-    # Making sure that status files are in place
-    # Once these are in place we'll perform all checks
+    #   First we need to make sure that all required status files are in place
+    #   Once these are in place we'll perform all necessary checks
     #
 
     if [ ! -e "$ServiceStatusFile" ] || [ ! -e "$ReplicationStatusFile" ] || [ ! -e "$LagStatusFile" ]
@@ -72,10 +72,10 @@ CheckStatusFiles() {
 CheckServiceStatus() {
 
     #
-    # Checking service status
+    #   Service status flags:
     #
-    # 0 - Service is not running
-    # 1 - Service is running
+    #   0 - Service is not running
+    #   1 - Service is running
     #
 
     ServiceStatus=`systemctl is-active $ServiceSystemName.service`
@@ -167,15 +167,14 @@ CheckServiceStatus() {
 CheckThreadsStatus() {
 
     #
-    # Checking MySQL Replication Status, if it's running or not
+    #   Replication services status flags:
     #
-    # 0 - MySQL Replication is stopped 
-    # 1 - MySQL Replication is running
-    # 10 - SQL Thread is not running 
-    # 20 - IO Thread is not running
+    #   0 - MySQL Replication is stopped 
+    #   1 - MySQL Replication is running
+    #   10 - SQL Thread is not running 
+    #   20 - IO Thread is not running
     # 
 
-    # First check, no issue or recovery check
     if [[ ${SQLThreadStatus} == 'Yes' ]] && [[ ${IOThreadStatus} == 'Yes' ]]
     then
 
@@ -269,7 +268,10 @@ CheckThreadsStatus() {
     fi
 
 
-    # Replication is clearly broken or is been manually stopped
+    #
+    #   Replication is clearly broken or the slave has been manually stopped
+    #
+
     if [[ ${SQLThreadStatus} == 'No' ]] && [[ ${IOThreadStatus} == 'No' ]]
     then
 
@@ -336,21 +338,20 @@ CheckThreadsStatus() {
 CheckLagStatus() {
 
     #
-    # Checking MySQL Replication Lag, if there's any
+    #   Replication lag status flags:
     # 
-    # 0 - No lag, under ten minutes
-    # 1 - Under 1 hour
-    # 2 - Between 1 and 6 hours
-    # 3 - Between 6 and 12 hours
-    # 4 - Over 12 hours
+    #   0 - No lag, under 30 minutes
+    #   1 - Under 1 hour
+    #   2 - Between 1 and 6 hours
+    #   3 - Between 6 and 12 hours
+    #   4 - Over 12 hours
     #
 
     # 
-    # Under ten minutes
-    # Level 0
+    #   Level 0
     #
 
-    if [ $LagStatus -ge 0 ] && [ "$LagStatus" -lt 600 ]
+    if [ $LagStatus -ge 0 ] && [ "$LagStatus" -lt 1800 ]
     then
 
         LagTime="$LagStatus seconds"
@@ -389,11 +390,10 @@ CheckLagStatus() {
     fi
 
     #
-    # Under one hour
-    # Level 1
+    #   Level 1
     #
 
-    if [ $LagStatus -gt 600 ] && [ $LagStatus -lt 3600 ]
+    if [ $LagStatus -gt 1800 ] && [ $LagStatus -lt 3600 ]
     then
 
         LagTime="$(($LagStatus/60)) minute(s)"
@@ -424,8 +424,7 @@ CheckLagStatus() {
     fi
 
     #
-    # Between one and six hours
-    # Level 2
+    #   Level 2
     #
 
     if [ $LagStatus -gt 3600 ] && [ $LagStatus -lt 21600 ]
@@ -459,8 +458,7 @@ CheckLagStatus() {
     fi
 
     #
-    # Over six hours but less than twelve
-    # Level 3
+    #   Level 3
     #
 
     if [ $LagStatus -ge 21600 ] && [ $LagStatus -le 43200 ]
@@ -494,8 +492,7 @@ CheckLagStatus() {
     fi
 
     # 
-    # Over twelve hours
-    # Level 4
+    #   Level 4
     #
 
     if [ $LagStatus -gt 43200 ]
