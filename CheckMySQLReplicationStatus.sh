@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#
+# Tufora.com
+# https://github.com/tufora/CheckMySQLReplicationStatus.sh.git
+#
+
 ServiceSystemName="mysql"
 ServiceFriendlyName="MySQL"
 SQLThreadStatus=$(/usr/bin/mysql -e "SHOW SLAVE STATUS\G" | grep "Slave_SQL_Running:" | awk '{ print $2 }')
@@ -20,7 +25,6 @@ CheckStatusFiles() {
     #
     # Making sure that status files are in place
     # Once these are in place we'll perform all checks
-    # OK - This is it 
     #
 
     if [ ! -e "$ServiceStatusFile" ] || [ ! -e "$ReplicationStatusFile" ] || [ ! -e "$LagStatusFile" ]
