@@ -4,7 +4,6 @@
 # Tufora.com
 # https://github.com/tufora/CheckMySQLReplicationStatus.sh.git
 #
-#
 
 ServiceSystemName="mysql"
 ServiceFriendlyName="MySQL"
